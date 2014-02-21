@@ -1,0 +1,26 @@
+CC=gcc
+ATLAS_PATH=/opt/tools/libraries/atlas
+NEHALEM_INCLUDE_PATH=$(ATLAS_PATH)/3.10.1-nehalem-gcc-4.4.6/include
+NEHALEM_LIB_PATH=$(ATLAS_PATH)/3.10.1-nehalem-gcc-4.4.6/lib
+CFLAGS=-Wall -DNDEBUG=1
+#-ftree-vectorizer-verbose=10
+
+compile: dsymv_benchmark
+
+dsymv_benchmark: dsymv_benchmark.c raw_dsymv opt_dsymv sse_dsymv
+	$(CC) $(CFLAGS) $< raw_dsymv_nehalem.o opt_dsymv_nehalem.o sse_dsymv_nehalem.o -o dsymv_nehalem -I$(NEHALEM_INCLUDE_PATH) -L$(NEHALEM_LIB_PATH) -lcblas -latlas
+
+raw_dsymv: my_dsymv.c
+	$(CC) $(CFLAGS) $< -c -o raw_dsymv_nehalem.o -I$(NEHALEM_INCLUDE_PATH) 
+
+opt_dsymv: mypp_dsymv.c
+	$(CC) $(CFLAGS) -O3 -msse3 $< -c -o opt_dsymv_nehalem.o -I$(NEHALEM_INCLUDE_PATH) 
+
+sse_dsymv: mymm_dsymv.c
+	$(CC) $(CFLAGS) -O3 -msse3 $< -c -o sse_dsymv_nehalem.o -I$(NEHALEM_INCLUDE_PATH) 
+
+run:
+	./dsymv_nehalem
+
+clean:
+	rm -f dsymv_nehalem raw_dsymv_nehalem.o opt_dsymv_nehalem.o sse_dsymv_nehalem.o

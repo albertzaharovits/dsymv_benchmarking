@@ -1,0 +1,23 @@
+CC=gcc
+ATLAS_PATH=/opt/tools/libraries/atlas
+OPTERON_INCLUDE_PATH=$(ATLAS_PATH)/3.10.1-opteron-gcc-4.4.6/include
+OPTERON_LIB_PATH=$(ATLAS_PATH)/3.10.1-opteron-gcc-4.4.6/lib
+CFLAGS=-Wall -DNDEBUG=1
+
+compile: dsymv_benchmark
+
+dsymv_benchmark: dsymv_benchmark.c raw_dsymv opt_dsymv sse_dsymv
+	$(CC) $(CFLAGS) $< raw_dsymv_opteron.o opt_dsymv_opteron.o sse_dsymv_opteron.o -o dsymv_opteron -I$(OPTERON_INCLUDE_PATH) -L$(OPTERON_LIB_PATH) -lcblas -latlas 
+
+raw_dsymv: my_dsymv.c
+	$(CC) $(CFLAGS) $< -c -o raw_dsymv_opteron.o -I$(OPTERON_INCLUDE_PATH) 
+
+opt_dsymv: mypp_dsymv.c
+	$(CC) $(CFLAGS) -msse3 -O3 $< -c -o opt_dsymv_opteron.o -I$(OPTERON_INCLUDE_PATH) 
+
+sse_dsymv: mymm_dsymv.c
+	$(CC) $(CFLAGS) -O3 -msse3 $< -c -o sse_dsymv_opteron.o -I$(OPTERON_INCLUDE_PATH) 
+run:
+	./dsymv_opteron
+clean:
+	rm -f dsymv_opteron raw_dsymv_opteron.o opt_dsymv_opteron.o sse_dsymv_opteron.o

@@ -1,0 +1,17 @@
+gcc -Wall my_dsymv.c -c -o raw_dsymv_nehalem.o -I/opt/tools/libraries/atlas/3.10.1-nehalem-gcc-4.4.6/include 
+gcc -Wall -O5 -msse3 mypp_dsymv.c -c -o opt_dsymv_nehalem.o -I/opt/tools/libraries/atlas/3.10.1-nehalem-gcc-4.4.6/include 
+gcc -Wall -O5 -msse3 mymm_dsymv.c -c -o sse_dsymv_nehalem.o -I/opt/tools/libraries/atlas/3.10.1-nehalem-gcc-4.4.6/include 
+gcc -Wall dsymv_benchmark.c raw_dsymv_nehalem.o opt_dsymv_nehalem.o sse_dsymv_nehalem.o -o dsymv_nehalem -I/opt/tools/libraries/atlas/3.10.1-nehalem-gcc-4.4.6/include -L/opt/tools/libraries/atlas/3.10.1-nehalem-gcc-4.4.6/lib -lcblas -latlas
+Running nehalem tests
+size 16384: 405183 5715974 compare Y2 & my_dsymv Y3 = 1
+222268 compare Y2 & mypp_dsymv Y3 = 1
+275054 compare Y2 & mypp_dsymv Y3 = 1
+
+size 16896: 194445 4293267 compare Y2 & my_dsymv Y3 = 1
+240382 compare Y2 & mypp_dsymv Y3 = 1
+298772 compare Y2 & mypp_dsymv Y3 = 1
+
+size 17408: 188629 4356321 compare Y2 & my_dsymv Y3 = 1
+256200 compare Y2 & mypp_dsymv Y3 = 1
+316850 compare Y2 & mypp_dsymv Y3 = 1
+

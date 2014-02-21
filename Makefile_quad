@@ -1,0 +1,24 @@
+CC=gcc
+ATLAS_PATH=/opt/tools/libraries/atlas
+QUAD_INCLUDE_PATH=$(ATLAS_PATH)/3.10.1-quad-gcc-4.4.6/include
+QUAD_LIB_PATH=$(ATLAS_PATH)/3.10.1-quad-gcc-4.4.6/lib
+CFLAGS=-Wall -DNDEBUG=1
+
+compile: dsymv_benchmark
+
+dsymv_benchmark: dsymv_benchmark.c raw_dsymv opt_dsymv sse_dsymv
+	$(CC) $(CFLAGS) $< raw_dsymv_quad.o opt_dsymv_quad.o sse_dsymv_quad.o -o dsymv_quad    -I$(QUAD_INCLUDE_PATH)	 -L$(QUAD_LIB_PATH) -lcblas -latlas 
+
+raw_dsymv: my_dsymv.c
+	$(CC) $(CFLAGS) $< -c -o raw_dsymv_quad.o -I$(QUAD_INCLUDE_PATH) 
+
+opt_dsymv: mypp_dsymv.c
+	$(CC) $(CFLAGS) -O3 -msse3 $< -c -o opt_dsymv_quad.o -I$(QUAD_INCLUDE_PATH) 
+
+sse_dsymv: mymm_dsymv.c
+	$(CC) $(CFLAGS) -O3 -msse3 $< -c -o sse_dsymv_quad.o -I$(QUAD_INCLUDE_PATH) 
+
+run:
+	./dsymv_quad
+clean:
+	rm -f dsymv_quad raw_dsymv_quad.o opt_dsymv_quad.o sse_dsymv_quad.o

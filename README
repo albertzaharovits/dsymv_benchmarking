@@ -1,0 +1,39 @@
+BLAS DSYMV benchmarking on the Nehalem, Opteron, and Quad architectures.
+
+Albert Zaharovits albert.zaharovits@gmail.com
+7.4.2013
+
+Directory structure :
+        - out/ output files of the run.sh script
+        - Makefiles for each architecture: Makefile_<architecture>
+        - running scripts for each architecture: exec_script_<architecture>
+        - charts for each individual architecture and matrice sizes up to 16k or 36k
+Source structure :
+        - the main source dsymv_benchmark.c, calls all other DSYMV functions
+        - my_dsymv.c is the straight-forward implementation and compiled without compiler optimizations
+        - mypp_dsymv.c is the improved implementation: the matrix A is crossed only once + compiler optimizations -O3 -msse3
+        - mymm_dsymv.c is another improved implementation: the interior loop is parallelized using SSE registers + compiler optimizations -O3 -msse3
+
+Observations :
+        I implemented two optimizations, the first: loops the matrix once and takes the
+branch out from the inner loop, while the second: inner-loop is SSE parallelized, although
+in order to achieve this, the matrix should be crossed 2 times. GCC compiler does not
+SSE autoparallelize (directive: -ftree-vectorizer-verbose=10)
+Implementations are more restrictive than the Blas, but can be extended without
+significant overhead. The biggest limitation is N == LDA , that is the square symmetric matrix
+
+Graphs illustrate performances of the three relevant implementations: cblas standard version, inner branch optimization,
+and SSE parallelization. Straight-forward implementation is way too slow and could broken graphs layout. 
+The /proc/cpuinfo on each chassis should order runtimes Nehalem < Opteron < Quad. Nehalem has a huge cache of 12000KB 
+compared to the 512KB of the Opteron architecture, with the added benefit of the CPU clock of 3000MHz compared to the 2600MHz 
+frequency of the Opteron.
+Each test is run five times and the average runtime is displayed.
+To test only the running time, and not waste time with errors checking, the NDEBUG flag is defined
+
+For scales up to 16K in matrix size, the original cblas implementation is the fastest; 
+I suspect it "handles" cache very well, performing prefetches.
+However, this kind of optimizations are difficult to implement; another "suspicion" (not checked),
+but as you can see from the graphs, for large arrays, these prefetch schemes are not helpful. 
+Again I suspect these prefetch schemes are responsible for the spikes the cblas implementation exibits 
+on all the 3 architectures.
+
